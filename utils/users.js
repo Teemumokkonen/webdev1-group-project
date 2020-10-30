@@ -55,8 +55,9 @@ const generateId = () => {
  * @returns {boolean}
  */
 const emailInUse = email => {
-  // TODO: 8.3 Check if there already exists a user with a given email
-  throw new Error('Not Implemented');
+  const found = getAllUsers().find(user => user['email'] === email);
+  return typeof found !== 'undefined';
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -71,7 +72,12 @@ const emailInUse = email => {
  */
 const getUser = (email, password) => {
   // TODO: 8.3 Get user whose email and password match the provided values
-  throw new Error('Not Implemented');
+  const found = getAllUsers().find( user => user['email'] === email && user['password'] === password );
+  if (typeof found !== 'undefined' )  {
+    return JSON.parse(JSON.stringify(found));
+  };
+  return undefined;
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -85,7 +91,12 @@ const getUser = (email, password) => {
  */
 const getUserById = userId => {
   // TODO: 8.3 Find user by user id
-  throw new Error('Not Implemented');
+  const found = getAllUsers().find( user => user['_id'] === userId);
+  if (typeof found !== 'undefined' )  {
+    return JSON.parse(JSON.stringify(found));
+  };
+  return undefined;
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -95,8 +106,11 @@ const getUserById = userId => {
  * @returns {Object|undefined} deleted user or undefined if user does not exist
  */
 const deleteUserById = userId => {
-  // TODO: 8.3 Delete user with a given id
-  throw new Error('Not Implemented');
+  const user = getUserById(userId);
+  data.users = data.users.filter(usr => usr._id !== userId);
+
+  return user
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -109,7 +123,8 @@ const deleteUserById = userId => {
  */
 const getAllUsers = () => {
   // TODO: 8.3 Retrieve all users
-  throw new Error('Not Implemented');
+  return JSON.parse(JSON.stringify( data.users ));
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -127,7 +142,12 @@ const getAllUsers = () => {
 const saveNewUser = user => {
   // TODO: 8.3 Save new user
   // Use generateId() to assign a unique id to the newly created user.
-  throw new Error('Not Implemented');
+  usr = JSON.parse(JSON.stringify(user));
+  usr._id = generateId();
+  usr.role = 'customer';
+  data.users.push(usr);
+  return JSON.parse(JSON.stringify(usr));
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -145,7 +165,17 @@ const saveNewUser = user => {
  */
 const updateUserRole = (userId, role) => {
   // TODO: 8.3 Update user's role
-  throw new Error('Not Implemented');
+  if ( !data.roles.includes(role) ) {
+    throw new Error('Unknown role');
+  }
+  
+  const user = data.users.find( usr => usr._id === userId );
+  if (typeof user !== 'undefined') {
+    user.role = role;
+    return { ...user };
+  }
+  return undefined
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -159,7 +189,25 @@ const updateUserRole = (userId, role) => {
  */
 const validateUser = user => {
   // TODO: 8.3 Validate user before saving
-  throw new Error('Not Implemented');
+  let errors = [];
+  if (typeof user['name'] === 'undefined' ) {
+    errors.push('Missing name');
+  }
+
+  if (typeof user['email'] === 'undefined') {
+    errors.push('Missing email');
+  } 
+
+  if (typeof user['role'] !== 'undefined'
+      && !data.roles.includes(user['role']) ) {
+    errors.push('Unknown role'); 
+  }
+
+  if (typeof user['password'] === 'undefined') {
+    errors.push('Missing password');
+  }
+  return errors;
+  //throw new Error('Not Implemented');
 };
 
 module.exports = {
