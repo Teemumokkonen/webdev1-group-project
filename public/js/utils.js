@@ -20,7 +20,11 @@
  */
 const getJSON = async url => {
   // TODO: 8.3 Implement this
-  throw new Error('Not Implemented');
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {'accept': 'application/json'}
+  });
+  return response.json();
 };
 
 /**
@@ -41,7 +45,12 @@ const postOrPutJSON = async (url, method, data = {}) => {
   }
 
   // TODO: 8.3 Implement this
-  throw new Error('Not Implemented');
+  const response = await fetch(url, {
+    method: method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  return response.json();
 };
 
 /**

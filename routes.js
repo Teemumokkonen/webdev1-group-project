@@ -92,8 +92,8 @@ const handleRequest = async (request, response) => {
   // GET all users
   if (filePath === '/api/users' && method.toUpperCase() === 'GET') {
     // TODO: 8.3 Return all users as JSON
+    return responseUtils.sendJson( response, getAllUsers() );
     // TODO: 8.4 Add authentication (only allowed to users with role "admin")
-    throw new Error('Not Implemented');
   }
 
   // register new user
@@ -105,7 +105,22 @@ const handleRequest = async (request, response) => {
 
     // TODO: 8.3 Implement registration
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
-    throw new Error('Not Implemented');
+    parseBodyJson(request)
+    .then(json => {
+      const errs = validateUser(json);
+      if ( errs.length === 0 ) {
+        if (emailInUse(json.email)) {
+          return responseUtils.badRequest(response, 'Email already in use');
+        } 
+        else {
+          return responseUtils.createdResource(response, saveNewUser(json) );
+        }
+      }
+      else {
+        return responseUtils.badRequest(response, errs.join('\n'));
+      }
+    })
+    .catch(err => console.log(err));
   }
 };
 

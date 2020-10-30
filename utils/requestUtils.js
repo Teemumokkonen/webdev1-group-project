@@ -22,10 +22,14 @@ const getCredentials = request => {
  */
 const acceptsJson = request => {
   // TODO: 8.3 Check if the client accepts JSON as a response based on "Accept" request header
+  const accept = request.headers['accept'];
+  if ( typeof accept !== 'undefined' ) {
+    return ( accept.includes('application/json') || accept.includes('*/*') );
+  }
   // NOTE: "Accept" header format allows several comma separated values simultaneously
   // as in "text/html,application/xhtml+xml,application/json,application/xml;q=0.9,*/*;q=0.8"
   // Do not rely on the header value containing only single content type!
-  throw new Error('Not Implemented');
+  return false;
 };
 
 /**
@@ -36,7 +40,11 @@ const acceptsJson = request => {
  */
 const isJson = request => {
   // TODO: 8.3 Check whether request "Content-Type" is JSON or not
-  throw new Error('Not Implemented');
+  const contentType = request.headers['content-type'];
+  if (typeof contentType !== 'undefined') {
+    return contentType.includes('application/json');
+  }
+  return false;
 };
 
 /**
