@@ -1,3 +1,5 @@
+const { use } = require("chai");
+
 /**
  * Decode, parse and return user credentials (username and password)
  * from the Authorization header.
@@ -6,12 +8,25 @@
  * @returns {Array|null} [username, password] or null if header is missing
  */
 const getCredentials = request => {
-  // TODO: 8.4 Parse user credentials from the "Authorization" request header
-  // NOTE: The header is base64 encoded as required by the http standard.
-  //       You need to first decode the header back to its original form ("email:password").
-  //  See: https://attacomsian.com/blog/nodejs-base64-encode-decode
-  //       https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js/
-  throw new Error('Not Implemented');
+    // TODO: 8.4 Parse user credentials from the "Authorization" request header
+    // NOTE: The header is base64 encoded as required by the http standard.
+    //       You need to first decode the header back to its original form ("email:password").
+    //  See: https://attacomsian.com/blog/nodejs-base64-encode-decode
+    //       https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js/
+    let data = request.headers["authorization"];
+    if (typeof data !== 'undefined' && data.split(" ")[0] == 'Basic') {
+        let buff = new Buffer(data.split(" ")[1], 'base64');
+        let text = buff.toString('utf-8');
+        if (text != '') {
+            
+            return text.split(":");
+        }
+        return null;
+    }
+    return null;
+        
+
+  //throw new Error('Not Implemented');
 };
 
 /**
@@ -22,10 +37,14 @@ const getCredentials = request => {
  */
 const acceptsJson = request => {
   // TODO: 8.3 Check if the client accepts JSON as a response based on "Accept" request header
+  const accept = request.headers['accept'];
+  if ( typeof accept !== 'undefined' ) {
+    return ( accept.includes('application/json') || accept.includes('*/*') );
+  }
   // NOTE: "Accept" header format allows several comma separated values simultaneously
   // as in "text/html,application/xhtml+xml,application/json,application/xml;q=0.9,*/*;q=0.8"
   // Do not rely on the header value containing only single content type!
-  throw new Error('Not Implemented');
+  return false;
 };
 
 /**
@@ -36,7 +55,11 @@ const acceptsJson = request => {
  */
 const isJson = request => {
   // TODO: 8.3 Check whether request "Content-Type" is JSON or not
-  throw new Error('Not Implemented');
+  const contentType = request.headers['content-type'];
+  if (typeof contentType !== 'undefined') {
+    return contentType.includes('application/json');
+  }
+  return false;
 };
 
 /**

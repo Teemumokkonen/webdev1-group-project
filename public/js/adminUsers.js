@@ -1,3 +1,6 @@
+
+const API_USERS = '/api/users';
+
 /**
  * TODO: 8.3 List all users (use <template id="user-template"> in users.html)
  *       - Each user should be put inside a clone of the template fragment
@@ -14,7 +17,39 @@
  *
  *       - Each cloned template fragment should be appended to <div id="users-container">
  *       - Use getJSON() function from utils.js to fetch user data from server
- *
+ */
+const listAllUsers = () => {
+  const usersContainer = document.querySelector('#users-container');
+  const template = document.querySelector('#user-template');
+  
+  usersContainer.innerHTML = '';
+  getJSON( API_USERS )
+  .then(users => users.forEach(user => {
+    const clone = template.content.cloneNode(true);
+
+    // select elements
+    const name = clone.querySelector('h3');
+    const email = clone.querySelector('p.user-email');
+    const role = clone.querySelector('p.user-role');
+
+    // Edit text content
+    name.textContent = user['name'];
+    email.textContent = user['email'];
+    role.textContent = user['role'];
+
+    // Add id attributes
+    clone.querySelector('div.item-row').id = `user-${user['_id']}`;
+    clone.querySelector('.modify-button').id = `modify-${user['_id']}`;
+    clone.querySelector('.delete-button').id = `delete-${user['_id']}`;
+    name.id = `name-${user['_id']}`;
+    email.id = `email-${user['_id']}`;
+    role.id = `role-${user['_id']}`;
+
+    usersContainer.appendChild(clone);
+  }))
+  .catch(err => console.log(err));
+}
+/**
  * TODO: 8.5 Updating/modifying and deleting existing users
  *       - Use postOrPutJSON() function from utils.js to send your data back to server
  *       - Use deleteResource() function from utils.js to delete users from server
@@ -32,3 +67,5 @@
  *       - Deleting a user successfully should show a notification message "Deleted user {User Name}"
  *       - Use createNotification() function from utils.js to create notifications
  */
+
+ window.onload = listAllUsers;

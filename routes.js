@@ -2,6 +2,9 @@ const responseUtils = require('./utils/responseUtils');
 const { acceptsJson, isJson, parseBodyJson } = require('./utils/requestUtils');
 const { renderPublic } = require('./utils/render');
 const { emailInUse, getAllUsers, saveNewUser, validateUser } = require('./utils/users');
+const { getCurrentUser } = require('./auth/auth');
+const { basicAuthChallenge } = require('./utils/responseUtils');
+const auth = require('./auth/auth');
 
 /**
  * Known API routes and their allowed methods
@@ -92,8 +95,21 @@ const handleRequest = async (request, response) => {
   // GET all users
   if (filePath === '/api/users' && method.toUpperCase() === 'GET') {
     // TODO: 8.3 Return all users as JSON
-    // TODO: 8.4 Add authentication (only allowed to users with role "admin")
-    throw new Error('Not Implemented');
+      // TODO: 8.4 Add authentication (only allowed to users with role "admin")
+      let user = await auth.getCurrentUser(request);
+      //console.log(user);
+      if (user == null) {
+          return basicAuthChallenge(response);
+      }
+
+      else if (user.role == 'customer') {
+          responseUtils.forbidden(response);
+      }
+      else {
+
+          return responseUtils.sendJson(response, getAllUsers());
+
+      }
   }
 
   // register new user
@@ -105,7 +121,22 @@ const handleRequest = async (request, response) => {
 
     // TODO: 8.3 Implement registration
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
-    throw new Error('Not Implemented');
+    parseBodyJson(request)
+    .then(json => {
+      const errs = validateUser(json);
+      if ( errs.length === 0 ) {
+        if (emailInUse(json.email)) {
+          return responseUtils.badRequest(response, 'Email already in use');
+        } 
+        else {
+          return responseUtils.createdResource(response, saveNewUser(json) );
+        }
+      }
+      else {
+        return responseUtils.badRequest(response, errs.join('\n'));
+      }
+    })
+    .catch(err => console.log(err));
   }
 };
 
