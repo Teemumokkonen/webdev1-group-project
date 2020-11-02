@@ -76,16 +76,16 @@ const handleRequest = async (request, response) => {
     // TODO: 8.5 Implement view, update and delete a single user by ID (GET, PUT, DELETE)
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
     // throw new Error('Not Implemented');
-      let currUser = await auth.getCurrentUser(request);
-      if (currUser == null) {
+      const currUser = await auth.getCurrentUser(request);
+      if (currUser === null || typeof currUser === 'undefined') {
           return basicAuthChallenge(response);
       }
 
-      else if (currUser.role == 'customer') {
+      else if (currUser.role === 'customer') {
           responseUtils.forbidden(response);
       }
-      else if (currUser.role == 'admin') {
-          var user = getUserById(request.url.split('/')[3]);
+      else if (currUser.role === 'admin') {
+          const user = getUserById(request.url.split('/')[3]);
           if (typeof user !== 'undefined') {
 
               if (request.method === 'GET') {
@@ -94,9 +94,9 @@ const handleRequest = async (request, response) => {
 
               else if (request.method === 'PUT') {
                   //console.log(currUser.role);
-                  var body = await parseBodyJson(request);
-                  var role = body.role;
-                  if (typeof role == 'undefined' || (role != 'admin' && role != 'customer')) {
+                  const body = await parseBodyJson(request);
+                  const role = body.role;
+                  if (typeof role === 'undefined' || (role !== 'admin' && role !== 'customer')) {
                       responseUtils.badRequest(response);
                   }
                   else {
@@ -134,13 +134,16 @@ const handleRequest = async (request, response) => {
   if (filePath === '/api/users' && method.toUpperCase() === 'GET') {
     // TODO: 8.3 Return all users as JSON
       // TODO: 8.4 Add authentication (only allowed to users with role "admin")
-      let user = await auth.getCurrentUser(request);
-      //console.log(user);
-      if (user == null) {
+      const user = await auth.getCurrentUser(request);
+      if (user === null) {
           return basicAuthChallenge(response);
       }
 
-      else if (user.role == 'customer') {
+      else if (typeof user === 'undefined') {
+          return basicAuthChallenge(response);
+      }
+
+      else if (user.role === 'customer') {
           responseUtils.forbidden(response);
       }
       else {

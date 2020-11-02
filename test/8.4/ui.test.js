@@ -124,7 +124,8 @@ describe('User Inteface', () => {
 
       try {
         nameText = await (await nameElement[0].getProperty('textContent')).jsonValue();
-      } catch (error) {}
+      } catch (error) {// empty
+      }
 
       expect(nameText.trim()).to.equal(newCustomer.name.trim(), errorsMsg);
     });

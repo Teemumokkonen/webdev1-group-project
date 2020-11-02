@@ -13,11 +13,11 @@ const getCredentials = request => {
     //       You need to first decode the header back to its original form ("email:password").
     //  See: https://attacomsian.com/blog/nodejs-base64-encode-decode
     //       https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js/
-    let data = request.headers["authorization"];
-    if (typeof data !== 'undefined' && data.split(" ")[0] == 'Basic') {
-        let buff = new Buffer(data.split(" ")[1], 'base64');
-        let text = buff.toString('utf-8');
-        if (text != '') {
+    const data = request.headers["authorization"];
+    if (typeof data !== 'undefined' && data.split(" ")[0] === 'Basic') {
+        const buff = new Buffer(data.split(" ")[1], 'base64');
+        const text = buff.toString('utf-8');
+        if (text !== '') {
             
             return text.split(":");
         }

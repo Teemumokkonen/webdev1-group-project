@@ -14,11 +14,11 @@ const getCurrentUser = async request => {
   // and getUser(email, password) function from utils/users.js to get the currently
     // logged in user
     
-    var userData = getCredentials(request);
+    const userData = getCredentials(request);
     if (userData === null){
         return userData;
     }
-    var user = getUser(userData[0], userData[1]);
+    const user = getUser(userData[0], userData[1]);
 
     return user;
 

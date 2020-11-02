@@ -75,7 +75,7 @@ const getUser = (email, password) => {
   const found = getAllUsers().find( user => user['email'] === email && user['password'] === password );
   if (typeof found !== 'undefined' )  {
     return JSON.parse(JSON.stringify(found));
-  };
+  }
   return undefined;
   //throw new Error('Not Implemented');
 };
@@ -94,7 +94,7 @@ const getUserById = userId => {
   const found = getAllUsers().find( user => user['_id'] === userId);
   if (typeof found !== 'undefined' )  {
     return JSON.parse(JSON.stringify(found));
-  };
+  }
   return undefined;
   //throw new Error('Not Implemented');
 };
@@ -109,7 +109,7 @@ const deleteUserById = userId => {
   const user = getUserById(userId);
   data.users = data.users.filter(usr => usr._id !== userId);
 
-  return user
+    return user;
   //throw new Error('Not Implemented');
 };
 
@@ -142,7 +142,7 @@ const getAllUsers = () => {
 const saveNewUser = user => {
   // TODO: 8.3 Save new user
   // Use generateId() to assign a unique id to the newly created user.
-  usr = JSON.parse(JSON.stringify(user));
+  const usr = JSON.parse(JSON.stringify(user));
   usr._id = generateId();
   usr.role = 'customer';
   data.users.push(usr);
@@ -174,7 +174,7 @@ const updateUserRole = (userId, role) => {
     user.role = role;
     return { ...user };
   }
-  return undefined
+    return undefined;
   //throw new Error('Not Implemented');
 };
 
@@ -189,7 +189,7 @@ const updateUserRole = (userId, role) => {
  */
 const validateUser = user => {
   // TODO: 8.3 Validate user before saving
-  let errors = [];
+  const errors = [];
   if (typeof user['name'] === 'undefined' ) {
     errors.push('Missing name');
   }

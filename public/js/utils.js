@@ -106,7 +106,7 @@ const createNotification = (message, containerId, isSuccess = true) => {
   const newParagraph = document.createElement('p');
 
   // Create unique id for the notification so that it can easily be removed after timeout
-  const notificationId = generateId()
+    const notificationId = generateId();
   newParagraph.id = notificationId;
 
   // Set CSS class for the paragraph based on the isSuccess variable

@@ -125,7 +125,8 @@ describe('User Inteface', () => {
 
       try {
         nameText = await (await nameElement[0].getProperty('textContent')).jsonValue();
-      } catch (error) {}
+      } catch (error) {// empty
+      }
 
       expect(nameText.trim()).to.equal(newCustomer.name.trim(), errorMsg);
     });
@@ -140,7 +141,8 @@ describe('User Inteface', () => {
         await page.goto(usersPage, { waitUntil: 'networkidle0' });
         await page.click(openButtonSelector);
         await page.waitForTimeout(shortWaitTime);
-      } catch (error) {}
+      } catch (error) {// empty
+      }
 
       const updateButton = await page.$(updateButtonSelector);
       let errorMsg =

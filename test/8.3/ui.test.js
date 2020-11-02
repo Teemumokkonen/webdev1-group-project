@@ -120,9 +120,10 @@ describe('User Inteface', () => {
       const nameElement = await page.$x(`//h3[contains(., '${newCustomer.name}')]`);
       let nameText = '';
 
-      try {
-        nameText = await (await nameElement[0].getProperty('textContent')).jsonValue();
-      } catch (error) {}
+        try {
+            nameText = await (await nameElement[0].getProperty('textContent')).jsonValue();
+        } catch (error) {// empty
+        } 
 
       expect(nameText.trim()).to.equal(newCustomer.name.trim(), errorsMsg);
     });
