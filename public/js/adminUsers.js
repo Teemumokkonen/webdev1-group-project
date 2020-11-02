@@ -1,5 +1,7 @@
 
 const API_USERS = '/api/users';
+const theParent = document.getElementById('users-container');
+const formloc = document.getElementById('modify-user');
 
 /**
  * TODO: 8.3 List all users (use <template id="user-template"> in users.html)
@@ -52,7 +54,7 @@ const listAllUsers = () => {
 /**
  * TODO: 8.5 Updating/modifying and deleting existing users
  *       - Use postOrPutJSON() function from utils.js to send your data back to server
- *       - Use deleteResource() function from utils.js to delete users from server
+ *       - Use deleteResource() function from utils.js to delete user from servers
  *       - Clicking "Delete" button of a user will delete the user and update the listing accordingly
  *       - Clicking "Modify" button of a user will use <template id="form-template"> to
  *         show an editing form populated with the values of the selected user
@@ -67,5 +69,92 @@ const listAllUsers = () => {
  *       - Deleting a user successfully should show a notification message "Deleted user {User Name}"
  *       - Use createNotification() function from utils.js to create notifications
  */
+
+
+//Getting pushaction if element is button is pushed.
+//the pushed item is saved in variable button.
+
+
+function buttonAction(button) {
+    if (button.target !== button.currentTarget) {
+        var clickedItem = button.target;
+        //get parent element for the button
+        var parentContainer = clickedItem.parentElement;
+        var userNameElement = parentContainer.querySelector('h3');
+        var formContainer = document.querySelector('#modify-user');
+
+        //clear from if there is one before new form.
+        const form = formContainer.querySelector('#edit-user-form');
+        if (form != null) {
+            formContainer.removeChild(form);
+        }
+
+        //action for modify button
+        if (clickedItem.id.split('-')[0] == 'modify') {
+            //clone form template
+            const formContainer = document.querySelector('#modify-user');
+            const template = document.querySelector('#form-template');
+            const clone = template.content.cloneNode(true);
+
+
+            //get form fields
+            const id = clone.querySelector('#id-input');
+            const name = clone.querySelector('#name-input');
+            const email = clone.querySelector('#email-input');
+            const role = clone.querySelector('#role-input');
+
+            //user information
+            const userName = userNameElement.innerText;
+            const userId = parentContainer.id;
+            const userEmail = parentContainer.querySelector('.user-email').innerText;
+            const userRole = parentContainer.querySelector('.user-role').innerText;
+
+            //change form values
+            id.value = userId.split('-')[1];
+            name.value = userName;
+            email.value = userEmail;
+            role.value = userRole;
+
+            //change template user name
+            //This might have easier way to do but it works :D
+            var headlineName = clone.querySelector('h2');
+            headlineName.innerHTML = headlineName.innerHTML.replace('{User Name}', userName);
+            formContainer.appendChild(clone);
+
+        }
+        //action for delete button 
+        else if (clickedItem.id.split('-')[0] == 'delete') {
+            //removing the user that belongs to that element
+            var greatParentContainer = parentContainer.parentElement;
+            deleteResourse(API_USERS + '/' + parentContainer.id.split('-')[1]);
+            createNotification('Deleted user' + ' ' + userNameElement.innerText, 'notifications-container');
+            greatParentContainer.removeChild(parentContainer);
+        }
+    }
+}
+
+theParent.addEventListener("click", buttonAction, false);
+
+formloc.addEventListener('submit', function (e) {
+    //prevent default event
+    e.preventDefault();
+    //get form results
+    const formReturn = this.querySelector('form');
+    const role = formReturn.querySelector('#role-input').value;
+    //Update api
+    postOrPutJSON(API_USERS + '/' + formReturn.querySelector('#id-input').value, 'PUT', { "role": role });
+    var formContainer = document.querySelector('#modify-user');
+    const form = formContainer.querySelector('#edit-user-form');
+    //change element status
+    const userEl = document.querySelector('#user-' + formReturn.querySelector('#id-input').value);
+    userEl.querySelector('.user-role').innerHTML = role;
+
+    //close form and set noticication
+    formContainer.removeChild(form);
+    createNotification('Updated user' + ' ' + formReturn.querySelector('#name-input').value, 'notifications-container');
+    
+});
+
+
 
  window.onload = listAllUsers;

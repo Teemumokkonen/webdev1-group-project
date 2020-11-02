@@ -1,10 +1,12 @@
 const responseUtils = require('./utils/responseUtils');
 const { acceptsJson, isJson, parseBodyJson } = require('./utils/requestUtils');
 const { renderPublic } = require('./utils/render');
-const { emailInUse, getAllUsers, saveNewUser, validateUser } = require('./utils/users');
+const { emailInUse, getAllUsers, saveNewUser, validateUser, getUserById } = require('./utils/users');
 const { getCurrentUser } = require('./auth/auth');
 const { basicAuthChallenge } = require('./utils/responseUtils');
 const auth = require('./auth/auth');
+const render = require('./utils/render');
+const users = require('./utils/users');
 
 /**
  * Known API routes and their allowed methods
@@ -73,7 +75,43 @@ const handleRequest = async (request, response) => {
   if (matchUserId(filePath)) {
     // TODO: 8.5 Implement view, update and delete a single user by ID (GET, PUT, DELETE)
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
-    throw new Error('Not Implemented');
+    // throw new Error('Not Implemented');
+      let currUser = await auth.getCurrentUser(request);
+      if (currUser == null) {
+          return basicAuthChallenge(response);
+      }
+
+      else if (currUser.role == 'customer') {
+          responseUtils.forbidden(response);
+      }
+      else if (currUser.role == 'admin') {
+          var user = getUserById(request.url.split('/')[3]);
+          if (typeof user !== 'undefined') {
+
+              if (request.method === 'GET') {
+                  responseUtils.sendJson(response, user);
+              }
+
+              else if (request.method === 'PUT') {
+                  //console.log(currUser.role);
+                  var body = await parseBodyJson(request);
+                  var role = body.role;
+                  if (typeof role == 'undefined' || (role != 'admin' && role != 'customer')) {
+                      responseUtils.badRequest(response);
+                  }
+                  else {
+                      responseUtils.sendJson(response, users.updateUserRole(request.url.split('/')[3], role));
+                  }
+              }
+              else if (request.method === 'DELETE') {
+                  
+                  responseUtils.sendJson(response, users.deleteUserById(request.url.split('/')[3]));
+              }
+          }
+          else {
+              responseUtils.notFound(response);
+          }
+      }
   }
 
   // Default to 404 Not Found if unknown url
