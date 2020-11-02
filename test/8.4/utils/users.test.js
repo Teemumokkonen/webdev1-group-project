@@ -14,9 +14,13 @@ const {
 
 // helper function for creating randomized test data
 const generateRandomString = (len = 9) => {
-  return Math.random()
-    .toString(36)
-    .substr(2, len);
+  let str = '';
+
+  do {
+    str += Math.random().toString(36).substr(2, 9).trim();
+  } while (str.length < len);
+
+  return str.substr(0, len);
 };
 
 // Get users (create copies for test isolation)
@@ -260,35 +264,27 @@ describe('usersUtils', () => {
       const user = getTestUser();
       user.role = 'customer';
       delete user.email;
-      expect(validateUser(user))
-        .to.be.an('array')
-        .that.includes('Missing email');
+      expect(validateUser(user)).to.be.an('array').that.includes('Missing email');
     });
 
     it('should return "Missing password" when "password" is missing', () => {
       const user = getTestUser();
       user.role = 'customer';
       delete user.password;
-      expect(validateUser(user))
-        .to.be.an('array')
-        .that.includes('Missing password');
+      expect(validateUser(user)).to.be.an('array').that.includes('Missing password');
     });
 
     it('should return "Missing name" when "name" is missing', () => {
       const user = getTestUser();
       user.role = 'customer';
       delete user.name;
-      expect(validateUser(user))
-        .to.be.an('array')
-        .that.includes('Missing name');
+      expect(validateUser(user)).to.be.an('array').that.includes('Missing name');
     });
 
     it('should return "Unknown role" when role is unknown', () => {
       const user = getTestUser();
       user.role = generateRandomString();
-      expect(validateUser(user))
-        .to.be.an('array')
-        .that.includes('Unknown role');
+      expect(validateUser(user)).to.be.an('array').that.includes('Unknown role');
     });
 
     it('should allow user with missing role (return empty array)', () => {

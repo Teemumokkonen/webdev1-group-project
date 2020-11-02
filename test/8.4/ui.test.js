@@ -9,9 +9,7 @@ chai.use(chaiHttp);
 
 // helper function for creating randomized test data
 const generateRandomString = (len = 9) => {
-  return Math.random()
-    .toString(36)
-    .substr(2, len);
+  return Math.random().toString(36).substr(2, len);
 };
 
 const shortWaitTime = 200;

@@ -6,6 +6,7 @@ const { resetUsers } = require('../../utils/users');
 
 const registrationUrl = '/api/register';
 const usersUrl = '/api/users';
+const productsUrl = '/api/products';
 const contentType = 'application/json';
 chai.use(chaiHttp);
 
@@ -26,6 +27,7 @@ const generateRandomString = (len = 9) => {
 
 // Get users (create copies for test isolation)
 const users = require('../../users.json').map(user => ({ ...user }));
+const products = require('../../products.json').map(product => ({ ...product }));
 
 const adminUser = { ...users.find(u => u.role === 'admin') };
 const customerUser = { ...users.find(u => u.role === 'customer') };
@@ -551,6 +553,123 @@ describe('Routes', () => {
 
         expect(response).to.have.status(404);
       });
+    });
+  });
+
+  // Products endpoints
+  describe('Viewing all products: GET /api/products', () => {
+    it('should respond with "401 Unauthorized" when Authorization header is missing', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType);
+
+      expect(response).to.have.status(401);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is missing', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization credentials are incorrect', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${invalidCredentials}`);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is empty', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', '');
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is not properly encoded', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminUser.email}:${adminUser.password}`);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with "406 Not Acceptable" when Accept header is missing', async () => {
+      const response = await chai.request(handleRequest).get(usersUrl);
+      expect(response).to.have.status(406);
+    });
+
+    it('should respond with "406 Not Acceptable" when client does not accept JSON', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', 'text/html');
+
+      expect(response).to.have.status(406);
+    });
+
+    it('should respond with JSON when admin credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.an('array');
+    });
+
+    it('should respond with JSON when customer credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${customerCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.an('array');
+    });
+
+    it('should respond with correct data when admin credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.deep.equal(products);
+    });
+
+    it('should respond with correct data when customer credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${customerCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.deep.equal(products);
     });
   });
 });
