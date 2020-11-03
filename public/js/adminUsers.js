@@ -86,7 +86,7 @@ theParent.addEventListener('click', function (e) {
 
         //clear from if there is one before new form.
         const form = formContainer.querySelector('#edit-user-form');
-        if (form !== null) {
+        if (form !== null && (clickedItem.id.split('-')[0] === 'modify' || clickedItem.id.split('-')[0] === 'delete')) {
             formContainer.removeChild(form);
         }
 
@@ -133,7 +133,7 @@ theParent.addEventListener('click', function (e) {
         }
     }
 });
-
+    
 
 
 formloc.addEventListener('submit', function (e) {
