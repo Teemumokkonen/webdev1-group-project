@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="css/styles.css">
-    <title>Not Found</title>
+    <title>Products</title>
   </head>
 
   <body>
@@ -20,16 +21,22 @@
       </nav>
     </header>
     <main>
-      <h1>404 Page Not Found</h1>
-      <p>
-        <a href="register.html">Register</a> |
-        <a href="users.html">List Users</a> |
-        <a href="products.html">List Products</a> |
-        <a href="cart.html">Shopping Cart</a>
-      </p>
+      <h1>Products</h1>
+      <div id="notifications-container"></div>
+      <div id="products-container"></div>
     </main>
     <footer>
-      <p>Copyright &copy; 2020</p>
+      <p>Copyright &copy; 2020 diipadaa etc etc.</p>
     </footer>
+    <template id="product-template">
+      <div class="item-row">
+        <h3 class="product-name"></h3>
+        <p class="product-description"></p>
+        <p class="product-price"></p>
+        <button>Add to cart</button>
+      </div>
+    </template>
+    <script src="js/utils.js"></script>
+    <script src="js/products.js"></script>
   </body>
 </html>

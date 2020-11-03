@@ -1,13 +1,15 @@
 const chai = require('chai');
 const expect = chai.expect;
 const chaiHttp = require('chai-http');
-const { handleRequest } = require('../../routes');
-const { resetUsers } = require('../../utils/users');
+const { handleRequest } = require('../routes');
 
 const registrationUrl = '/api/register';
 const usersUrl = '/api/users';
+const productsUrl = '/api/products';
 const contentType = 'application/json';
 chai.use(chaiHttp);
+
+const User = require('../models/user');
 
 // helper function for authorization headers
 const encodeCredentials = (username, password) =>
@@ -24,8 +26,14 @@ const generateRandomString = (len = 9) => {
   return str.substr(0, len);
 };
 
+// Get products (create copies for test isolation)
+const products = require('../products.json').map(product => ({ ...product }));
+
 // Get users (create copies for test isolation)
-const users = require('../../users.json').map(user => ({ ...user }));
+const users = require('../users.json').map(user => {
+  const { name, email, password, role } = { ...user };
+  return { name, email, password, role };
+});
 
 const adminUser = { ...users.find(u => u.role === 'admin') };
 const customerUser = { ...users.find(u => u.role === 'customer') };
@@ -37,16 +45,22 @@ const invalidCredentials = encodeCredentials(adminUser.email, customerUser.passw
 const unknownUrls = [`/${generateRandomString(20)}.html`, `/api/${generateRandomString(20)}`];
 
 describe('Routes', () => {
+  let allUsers;
+
   // get randomized test user
   const getTestUser = () => {
     return {
-      name: 'Name',
+      name: generateRandomString(),
       email: `${generateRandomString()}@email.com`,
       password: generateRandomString(10)
     };
   };
 
-  beforeEach(() => resetUsers());
+  beforeEach(async () => {
+    await User.deleteMany({});
+    await User.create(users);
+    allUsers = await User.find({});
+  });
 
   describe('handleRequest()', () => {
     describe('General Server Functionality', () => {
@@ -194,10 +208,14 @@ describe('Routes', () => {
           .set('Accept', contentType)
           .send(user);
 
+        const createdUser = await User.findOne({ email: user.email }).exec();
+        const { id, name, email, role, password } = createdUser;
+
         expect(response).to.have.status(201);
         expect(response).to.be.json;
         expect(response.body).to.be.an('object');
         expect(response.body).to.have.all.keys('_id', 'name', 'email', 'password', 'role');
+        expect(response.body).to.include({ _id: id, name, email, role, password });
       });
 
       it('should set user role to "customer" when registration is successful', async () => {
@@ -210,11 +228,14 @@ describe('Routes', () => {
           .set('Accept', contentType)
           .send(user);
 
+        const createdUser = await User.findOne({ email: user.email }).exec();
+
         expect(response).to.have.status(201);
         expect(response).to.be.json;
         expect(response.body).to.be.an('object');
         expect(response.body).to.have.all.keys('_id', 'name', 'email', 'password', 'role');
         expect(response.body.role).to.equal('customer');
+        expect(createdUser.role).to.equal('customer');
       });
     });
 
@@ -300,8 +321,14 @@ describe('Routes', () => {
     });
 
     describe('Viewing a single user: GET /api/users/{id}', () => {
-      const testUser = users.find(u => u.role === 'admin' && u._id !== adminUser._id);
-      const url = `${usersUrl}/${testUser._id}`;
+      let testUser;
+      let url;
+
+      beforeEach(async () => {
+        const tempUser = users.find(u => u.role === 'admin' && u.email !== adminUser.email);
+        testUser = await User.findOne({ email: tempUser.email }).exec();
+        url = `${usersUrl}/${testUser.id}`;
+      });
 
       it('should respond with "401 Unauthorized" when Authorization header is missing', async () => {
         const response = await chai.request(handleRequest).get(url).set('Accept', contentType);
@@ -362,11 +389,18 @@ describe('Routes', () => {
     });
 
     describe('Updating users: PUT /api/users/{id}', () => {
-      const testUser = users.find(u => u.role === 'customer' && u._id !== customerUser._id);
-      const url = `${usersUrl}/${testUser._id}`;
       const user = {
         role: 'admin'
       };
+
+      let testUser;
+      let url;
+
+      beforeEach(async () => {
+        const tempUser = users.find(u => u.role === 'customer' && u.email !== customerUser.email);
+        testUser = await User.findOne({ email: tempUser.email }).exec();
+        url = `${usersUrl}/${testUser.id}`;
+      });
 
       it('should respond with "401 Unauthorized" when Authorization header is missing', async () => {
         const response = await chai.request(handleRequest).put(url).set('Accept', contentType);
@@ -420,7 +454,7 @@ describe('Routes', () => {
 
       it('should only update role', async () => {
         const userWithExtra = {
-          _id: generateRandomString(),
+          _id: generateRandomString(24),
           ...getTestUser(),
           role: 'customer'
         };
@@ -438,7 +472,7 @@ describe('Routes', () => {
         expect(response.body).to.have.all.keys('_id', 'name', 'email', 'password', 'role');
         expect(response.body.email).to.equal(testUser.email);
         expect(response.body.name).to.equal(testUser.name);
-        expect(response.body._id).to.equal(testUser._id);
+        expect(response.body._id).to.equal(testUser.id);
         expect(response.body.role).to.equal('customer');
       });
 
@@ -482,8 +516,14 @@ describe('Routes', () => {
     });
 
     describe('Deleting users: DELETE /api/users/{id}', () => {
-      const testUser = users[users.length - 1];
-      const url = `${usersUrl}/${testUser._id}`;
+      let testUser;
+      let url;
+
+      beforeEach(async () => {
+        const tempUser = users[users.length - 1];
+        testUser = await User.findOne({ email: tempUser.email }).exec();
+        url = `${usersUrl}/${testUser.id}`;
+      });
 
       it('should respond with "401 Unauthorized" when Authorization header is missing', async () => {
         const response = await chai.request(handleRequest).delete(url).set('Accept', contentType);
@@ -526,31 +566,153 @@ describe('Routes', () => {
           .set('Accept', contentType)
           .set('Authorization', `Basic ${adminCredentials}`);
 
+        const dbUsers = await User.find({});
         expect(response).to.have.status(200);
+        expect(dbUsers).to.be.lengthOf(allUsers.length - 1);
       });
 
       it('should return the deleted user', async () => {
         const response = await chai
           .request(handleRequest)
-          .delete(`${usersUrl}/${users[users.length - 2]._id}`)
+          .delete(url)
           .set('Accept', contentType)
           .set('Authorization', `Basic ${adminCredentials}`);
 
+        const dbUsers = await User.find({});
         expect(response).to.have.status(200);
         expect(response).to.be.json;
+        expect(dbUsers).to.be.lengthOf(allUsers.length - 1);
         expect(response.body).to.be.an('object');
         expect(response.body).to.have.all.keys('_id', 'name', 'email', 'password', 'role');
       });
 
       it('should respond with status code 404 when user does not exist', async () => {
+        const fakeId = testUser.id.split('').reverse().join('');
         const response = await chai
           .request(handleRequest)
-          .delete(`${url}${generateRandomString(10)}`)
+          .delete(`${usersUrl}/${fakeId}`)
           .set('Accept', contentType)
           .set('Authorization', `Basic ${adminCredentials}`);
 
         expect(response).to.have.status(404);
       });
+    });
+  });
+
+  // Products endpoints
+  describe('Viewing all products: GET /api/products', () => {
+    it('should respond with "401 Unauthorized" when Authorization header is missing', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType);
+
+      expect(response).to.have.status(401);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is missing', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization credentials are incorrect', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${invalidCredentials}`);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is empty', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', '');
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with Basic Auth Challenge when Authorization header is not properly encoded', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminUser.email}:${adminUser.password}`);
+
+      expect(response).to.have.status(401);
+      expect(response).to.have.header('www-authenticate', /basic/i);
+    });
+
+    it('should respond with "406 Not Acceptable" when Accept header is missing', async () => {
+      const response = await chai.request(handleRequest).get(usersUrl);
+      expect(response).to.have.status(406);
+    });
+
+    it('should respond with "406 Not Acceptable" when client does not accept JSON', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', 'text/html');
+
+      expect(response).to.have.status(406);
+    });
+
+    it('should respond with JSON when admin credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.an('array');
+    });
+
+    it('should respond with JSON when customer credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${customerCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.an('array');
+    });
+
+    it('should respond with correct data when admin credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${adminCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.deep.equal(products);
+    });
+
+    it('should respond with correct data when customer credentials are received', async () => {
+      const response = await chai
+        .request(handleRequest)
+        .get(productsUrl)
+        .set('Accept', contentType)
+        .set('Authorization', `Basic ${customerCredentials}`);
+
+      expect(response).to.have.status(200);
+      expect(response).to.be.json;
+      expect(response.body).to.be.deep.equal(products);
     });
   });
 });
