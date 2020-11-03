@@ -159,4 +159,5 @@ lib-cov
 # nyc test coverage
 .nyc_output
 
-
+# enviroment variables
+.env
