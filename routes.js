@@ -3,10 +3,12 @@ const { acceptsJson, isJson, parseBodyJson } = require('./utils/requestUtils');
 const { renderPublic } = require('./utils/render');
 const { emailInUse, getAllUsers, saveNewUser, validateUser, getUserById } = require('./utils/users');
 const { getCurrentUser } = require('./auth/auth');
-const { basicAuthChallenge } = require('./utils/responseUtils');
+const { basicAuthChallenge, sendJson } = require('./utils/responseUtils');
 const auth = require('./auth/auth');
 const render = require('./utils/render');
 const users = require('./utils/users');
+const products = require('./products.json');
+
 
 /**
  * Known API routes and their allowed methods
@@ -16,7 +18,8 @@ const users = require('./utils/users');
  */
 const allowedMethods = {
   '/api/register': ['POST'],
-  '/api/users': ['GET']
+  '/api/users': ['GET'],
+  '/api/products': ['GET']
 };
 
 /**
@@ -178,6 +181,19 @@ const handleRequest = async (request, response) => {
       }
     })
     .catch(err => console.log(err));
+  }
+
+  // Get products
+  if (filePath === '/api/products' && method.toUpperCase() === 'GET') {
+    // authenticate user. Allowed roles 'admin' and 'customer'
+    const user = await auth.getCurrentUser(request);
+    if (user === null || typeof user === 'undefined') {
+      return basicAuthChallenge(response);
+    }
+
+    else if (user.role === 'customer' || user.role === 'admin') {
+      return sendJson(response, products);
+    }
   }
 };
 
