@@ -5,8 +5,8 @@ const { emailInUse, getAllUsers, saveNewUser, validateUser, getUserById } = requ
 const { getCurrentUser } = require('./auth/auth');
 const { basicAuthChallenge, sendJson } = require('./utils/responseUtils');
 const auth = require('./auth/auth');
-const render = require('./utils/render');
-const users = require('./utils/users');
+//const users = require('./utils/users');
+const User = require("./models/user");
 const products = require('./products.json');
 
 
@@ -79,8 +79,14 @@ const handleRequest = async (request, response) => {
     // TODO: 8.5 Implement view, update and delete a single user by ID (GET, PUT, DELETE)
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
     // throw new Error('Not Implemented');
-      const currUser = await auth.getCurrentUser(request);
+
+      //get logged in user
+      const currUser = await getCurrentUser(request);
+      //console.log(currUser.role);
+
+      // user found
       if (currUser === null || typeof currUser === 'undefined') {
+          
           return basicAuthChallenge(response);
       }
 
@@ -88,13 +94,16 @@ const handleRequest = async (request, response) => {
           responseUtils.forbidden(response);
       }
       else if (currUser.role === 'admin') {
-          const user = getUserById(request.url.split('/')[3]);
-          if (typeof user !== 'undefined') {
+          //find user to be updated
+          const user = await User.findById(request.url.split('/')[3]).exec();
+          if (user !== null) {
 
+              //send the user data
               if (request.method === 'GET') {
                   responseUtils.sendJson(response, user);
               }
 
+              //update the user data
               else if (request.method === 'PUT') {
                   //console.log(currUser.role);
                   const body = await parseBodyJson(request);
@@ -103,12 +112,15 @@ const handleRequest = async (request, response) => {
                       responseUtils.badRequest(response);
                   }
                   else {
-                      responseUtils.sendJson(response, users.updateUserRole(request.url.split('/')[3], role));
+                      user.role = role;
+                      await user.save();
+                      responseUtils.sendJson(response, user);
                   }
               }
+              //delete user data
               else if (request.method === 'DELETE') {
-                  
-                  responseUtils.sendJson(response, users.deleteUserById(request.url.split('/')[3]));
+                  const deletedUser = await User.findOneAndDelete({ _id: user._id}).exec();
+                  responseUtils.sendJson(response, deletedUser);
               }
           }
           else {
@@ -150,8 +162,8 @@ const handleRequest = async (request, response) => {
           responseUtils.forbidden(response);
       }
       else {
-
-          return responseUtils.sendJson(response, getAllUsers());
+          const users = await User.find({});
+          return responseUtils.sendJson(response, users);
 
       }
   }
@@ -165,22 +177,27 @@ const handleRequest = async (request, response) => {
 
     // TODO: 8.3 Implement registration
     // You can use parseBodyJson(request) from utils/requestUtils.js to parse request body
-    parseBodyJson(request)
-    .then(json => {
-      const errs = validateUser(json);
-      if ( errs.length === 0 ) {
-        if (emailInUse(json.email)) {
-          return responseUtils.badRequest(response, 'Email already in use');
-        } 
-        else {
-          return responseUtils.createdResource(response, saveNewUser(json) );
-        }
+      if (!isJson(request)) {
+          return responseUtils.badRequest(response, 'Invalid Content-Type. Expected application/json');
       }
-      else {
-        return responseUtils.badRequest(response, errs.join('\n'));
+      //get new user from request
+      const user = await (parseBodyJson(request));
+      const newUser = new User(user);
+      // attempt to register new user (save the document)
+      // all newly registered users should be customers
+      const emailUser = await User.findOne({ email: newUser.email }).exec();
+      if (emailUser !== null) {
+          return responseUtils.badRequest(response, '400 Bad Request');
       }
-    })
-    .catch(err => console.log(err));
+      try {
+          newUser.role = "customer";
+          const registereduser = await newUser.save();
+          return responseUtils.createdResource(response, registereduser);
+          // error in registering user
+      }
+      catch (error) {
+          return responseUtils.badRequest(response, '400 Bad Request');
+      }
   }
 
   // Get products

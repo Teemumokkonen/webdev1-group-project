@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Install
 Install the node dependiesies
 ```
@@ -21,7 +21,7 @@ Navigate to the folder containing .eslintrc.json. Then run following command.
 npx eslint .
 ```
 And fix the errors.
-=======
+
 # Group 
 
 Member1:  name, email, student ID, 
@@ -84,4 +84,3 @@ TODO: list the security threats represented in the course slides.
 Document how your application protects against the threats.
 You are also free to add more security threats + protection here, if you will.
 
->>>>>>> fcd512a9c3494bbbbafecc75e42058a31e07037b

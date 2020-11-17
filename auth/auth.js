@@ -1,5 +1,6 @@
 const { getCredentials } = require("../utils/requestUtils");
-const { getUser } = require("../utils/users");
+//const { getUser } = require("../utils/users");
+const User = require("../models/user");
 
 /**
  * Get current user based on the request headers
@@ -16,13 +17,22 @@ const getCurrentUser = async request => {
     
     const userData = getCredentials(request);
     if (userData === null){
-        return userData;
+        return null;
     }
-    const user = getUser(userData[0], userData[1]);
 
-    return user;
+    //const user = getUser(userData[0], userData[1]);
 
-    
+    const user = await User.findOne({ email: userData[0] }).exec();
+
+    if (user === null) {
+        return null;
+    } else {
+        if (await user.checkPassword(userData[1])) {
+            return user;
+        } else {
+            return null;
+        }
+    }
 
     //throw new Error('Not Implemented');
 };
