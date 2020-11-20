@@ -45,6 +45,8 @@
                 class="badge badge-danger">DELETE</span> /api/products/{productId}</a></li>
           <li class="nav-item"><a class="nav-link" href="#api-Admins-usersGet"><span
                 class="badge badge-primary">GET</span> /api/users</a></li>
+          <li class="nav-item"><a class="nav-link" href="#api-Admins-usersUserIdGet"><span
+                class="badge badge-primary">GET</span> /api/users/{userId}</a></li>
           <li class="nav-item"><a class="nav-link" href="#api-Admins-usersUserIdPut"><span
                 class="badge badge-warning">PUT</span> /api/users/{userId}</a></li>
           <li class="nav-item"><a class="nav-link" href="#api-Admins-usersUserIdDelete"><span
@@ -154,7 +156,7 @@
         <hr>
         <h3 id="api-Admins-productsProductIdGet" class="p-1"><span class="badge badge-primary">GET</span>
           /api/products/{productId}</h3>
-        <p class="lead">Gets a single products information</p>
+        <p class="lead">Get a single product's information</p>
         <h4>Path Parameters</h4>
         <dl class="row">
           <dt class="col-sm-1">productId</dt>
@@ -286,6 +288,34 @@
 ]
         </code></pre>
         <hr>
+        <h3 id="api-Admins-usersUserIdGet" class="p-1"><span class="badge badge-primary">GET</span>
+          /api/users/{userId}</h3>
+        <p class="lead">Get a single user's information</p>
+        <h4>Path Parameters</h4>
+        <dl class="row">
+          <dt class="col-sm-1">userId</dt>
+          <dd class="col-sm-11">ID of the user to get</dd>
+        </dl>
+        <h4>Request Body</h4>
+        <p>Empty</p>
+        <h4>Responses</h4>
+        <dl class="row">
+          <dt class="col-sm-1">200</dt>
+          <dd class="col-sm-11"><a href="#api-Schema-User">User</a> found</dd>
+          <dt class="col-sm-1">404</dt>
+          <dd class="col-sm-11">User with the given ID not found</dd>
+        </dl>
+        <h4>Example Response</h4>
+        <p class="text-monospace">Content-Type: application/json</p>
+        <pre><code class="json">{
+    "_id" : "f398d576bcaf672382ff2ac6",
+    "password" : "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+    "role" : "customer",
+    "name" : "Emmet Brickowski",
+    "email" : "emmet.brickowski@google.com"
+  }
+        </code></pre>
+        <hr>
         <h3 id="api-Admins-usersUserIdPut" class="p-1"><span class="badge badge-warning">PUT</span>
           /api/users/{userId}</h3>
         <p class="lead">Updates a user's role. <mark>Notice: a user CANNOT update his/her own role</mark></p>
@@ -374,8 +404,9 @@
   {
     "_id": "1a98984faee67983ceaf9831",
     "customerId": "ad83fe984303cc5498aaff92",
-    "products": [
+    "items": [
       {
+        "_id": "33fafadf25ecc98b32cdfddd",
         "product": {
           "_id": "9874fadf76ecc98732cdfac7",
           "name": "Candy Bar",
@@ -385,6 +416,7 @@
         "quantity": 12
       },
       {
+        "_id": "45fafadf25ecc66b3acdfdde",
         "product": {
           "_id": "8bbd8603af35cdd73e387266",
           "name": "English Dictionary",
@@ -398,8 +430,9 @@
   {
     "_id": "1a98984faee67983ceaf9832",
     "customerId": "ad83fe984303cc5498aaff93",
-    "products": [
+    "items: [
       {
+        "_id": "33fafadf25ecc98b32cdfddd",
         "product": {
           "_id": "98bcbbaf57632f21adf12301",
           "name": "Lego Racing Car",
@@ -409,6 +442,7 @@
         "quantity": 2
       },
       {
+        "_id": "225fafadf25ec766b3acdfddf",
         "product": {
           "_id": "2398d576bcaa672382ff2acf",
           "name": "Playing Cards",
@@ -447,8 +481,9 @@
         <pre><code class="json">{
   "_id": "1a98984faee67983ceaf9832",
   "customerId": "ad83fe984303cc5498aaff93",
-  "products": [
+  "items": [
     {
+      "_id": "33fafadf25ecc98b32cdfddd",
       "product": {
         "_id": "98bcbbaf57632f21adf12301",
         "name": "Lego Racing Car",
@@ -458,6 +493,7 @@
       "quantity": 2
     },
     {
+      "_id": "11fafadf25ec098b32cdfda9",
       "product": {
         "_id": "2398d576bcaa672382ff2acf",
         "name": "Playing Cards",
@@ -508,7 +544,7 @@
         <hr>
         <h3 id="api-Customers-productsProductIdGet" class="p-1"><span class="badge badge-primary">GET</span>
           /api/products/{productId}</h3>
-        <p class="lead">Gets a single products information</p>
+        <p class="lead">Get a single product's information</p>
         <h4>Path Parameters</h4>
         <dl class="row">
           <dt class="col-sm-1">productId</dt>
@@ -555,8 +591,9 @@
   {
     "_id": "1a98984faee67983ceaf9831",
     "customerId": "ad83fe984303cc5498aaff93",
-    "products": [
+    "items": [
       {
+        "_id": "45fafadf25ecc66b3acdfdde",
         "product": {
           "_id": "9874fadf76ecc98732cdfac7",
           "name": "Candy Bar",
@@ -566,6 +603,7 @@
         "quantity": 12
       },
       {
+        "_id": "a10afadf25ecc66b37bd023f",
         "product": {
           "_id": "8bbd8603af35cdd73e387266",
           "name": "English Dictionary",
@@ -579,8 +617,9 @@
   {
     "_id": "1a98984faee67983ceaf9832",
     "customerId": "ad83fe984303cc5498aaff93",
-    "products": [
+    "items": [
       {
+        "_id": "56fd0adf25ecc66b3acdfd06",
         "product": {
           "_id": "98bcbbaf57632f21adf12301",
           "name": "Lego Racing Car",
@@ -590,6 +629,7 @@
         "quantity": 2
       },
       {
+        "_id": "4555bcca87ecc26b3acdfdd4",
         "product": {
           "_id": "2398d576bcaa672382ff2acf",
           "name": "Playing Cards",
@@ -605,16 +645,17 @@
         <hr>
         <h3 id="api-Customers-ordersPost" class="p-1"><span class="badge badge-success">POST</span> /api/orders</h3>
         <p class="lead">
-          Adds a new order. <mark>Notice: <code>_id</code> is auto-generated by the server, do NOT add
-          <code>_id</code> to this request body. Also <code>customerId</code> is NOT part of the request
-          and it is automatically set to the id of the current user.</mark></p>
+          Adds a new order. <mark>Notice: <code>_id</code> for the actual <strong>order and each order item</strong>
+          should be auto-generated by the server, do NOT add <code>_id</code> to this request body
+          <strong>except for each product</strong>. Also <code>customerId</code> is NOT part of the request and it
+          is automatically set to the id of the current user.</mark></p>
         <h4>Path Parameters</h4>
         <p>None</p>
         <h4>Request Body</h4>
         <p><a href="#api-Schema-Order">Order</a></p>
         <h4>Example Request</h4>
         <pre><code class="json">{
-  "products": [
+  "items": [
     {
       "product": {
         "_id": "98bcbbaf57632f21adf12301",
@@ -650,8 +691,9 @@
         <pre><code class="json">{
   "_id": "1a98984faee67983ceaf9832",
   "customerId": "ad83fe984303cc5498aaff93",
-  "products": [
+  "items": [
     {
+      "_id": "45fafadf25ecc66b3acdfdde",
       "product": {
         "_id": "98bcbbaf57632f21adf12301",
         "name": "Lego Racing Car",
@@ -661,6 +703,7 @@
       "quantity": 2
     },
     {
+      "_id": "cc66b3acdfdde45fafadf25e",
       "product": {
         "_id": "2398d576bcaa672382ff2acf",
         "name": "Playing Cards",
@@ -698,8 +741,9 @@
         <pre><code class="json">{
   "_id": "1a98984faee67983ceaf9832",
   "customerId": "ad83fe984303cc5498aaff93",
-  "products": [
+  "items": [
     {
+      "_id": "25ecc645fafadf6b3acdfdde",
       "product": {
         "_id": "98bcbbaf57632f21adf12301",
         "name": "Lego Racing Car",
@@ -709,6 +753,7 @@
       "quantity": 2
     },
     {
+      "_id": "3acdfdde45fafadf25ecc66b",
       "product": {
         "_id": "2398d576bcaa672382ff2acf",
         "name": "Playing Cards",
@@ -850,7 +895,7 @@
               <dd class="col-sm-10">f398d576bcaf672382ff2ac6</dd>
             </dl>
           </dd>
-          <dt class="col-sm-2">products (<strong>required</strong>)</dt>
+          <dt class="col-sm-2">items (<strong>required</strong>)</dt>
           <dd class="col-sm-10">
             <dl class="row">
               <dt class="col-sm-2">type</dt>
@@ -870,6 +915,17 @@
         <h3 id="api-Schema-OrderedItem">OrderedItem</h3>
         <p class="lead">Internal schema for products inside Order</p>
         <dl class="row">
+          <dt class="col-sm-2">_id</dt>
+          <dd class="col-sm-10">
+            <dl class="row">
+              <dt class="col-sm-2">type</dt>
+              <dd class="col-sm-10">string</dd>
+              <dt class="col-sm-2">format</dt>
+              <dd class="col-sm-10">mongo object ID</dd>
+              <dt class="col-sm-2">example</dt>
+              <dd class="col-sm-10">f398d576bcaf672382ff2ac6</dd>
+            </dl>
+          </dd>
           <dt class="col-sm-2">product (<strong>required</strong>)</dt>
           <dd class="col-sm-10">
             <dl class="row">
