@@ -1,3 +1,6 @@
+const responsesUtils = require('../utils/responseUtils');
+const products = require('../products.json');
+
 /**
  * Send all products as JSON
  *
@@ -5,7 +8,7 @@
  */
 const getAllProducts = async response => {
   // TODO: 10.1 Implement this
-  throw new Error('Not Implemented');
+  responsesUtils.sendJson(response, products);
 };
 
 module.exports = { getAllProducts };
