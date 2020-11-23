@@ -1,5 +1,7 @@
 // JavaScript source code
 
+const { getContentType } = require('../../utils/render') 
+
 describe('Issues', () => {
     //first
     it('As an admin I want to add new a product to the database.', async () => {
@@ -50,4 +52,40 @@ describe('Issues', () => {
     it('Create a schema for orderedItem', async () => {
         expect(false).to.be.true;
     });
+
 });
+
+describe('content types', () => {
+
+    it('text/javascript', async () => {
+        getContentType('js');
+    });
+
+    it('json', async () => {
+        getContentType('json');
+    });
+
+    it('png', async () => {
+        getContentType('png');
+    });
+
+    it('jpg', async () => {
+        getContentType('jpg');
+    });
+
+    it('svg', async () => {
+        getContentType('svg');
+    });
+
+    it('wav', async () => {
+        getContentType('wav');
+    });
+
+    it('css', async () => {
+        getContentType('css');
+    });
+
+});
+    //first
+
+
