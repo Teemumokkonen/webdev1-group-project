@@ -136,11 +136,11 @@ const handleRequest = async (request, response) => {
     if (currentUser === null) {
       return responseUtils.basicAuthChallenge(response);
     }
-    /*
+    
     else if (typeof currentUser === 'undefined') {
       return responseUtils.basicAuthChallenge(response);
     }
-    */
+    
 
     else if (currentUser.role === 'customer') {
       responseUtils.forbidden(response);
