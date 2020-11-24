@@ -1,3 +1,8 @@
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+// This file is depricated. Use mongoDB and models/user.js instead. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
 /**
  * Week 08 utility file for user related operations
  *
@@ -30,10 +35,12 @@ const resetUsers = () => {
   data.users = require('../users.json').map(user => ({ ...user }));
 };
 
+/* Commented out the depricated non-functional-programming code.
 /**
  * Generate a random string for use as user ID
  * @returns {string}
- */
+ * /
+
 const generateId = () => {
   let id;
 
@@ -47,6 +54,7 @@ const generateId = () => {
 
   return id;
 };
+*/
 
 /**
  * Check if email is already in use by another user
